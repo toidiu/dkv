@@ -1,0 +1,68 @@
+syntax = "proto3";
+
+option java_multiple_files = true;
+option java_package = "io.grpc.iheart.dkv";
+option java_outer_classname = "DKVProto";
+option objc_class_prefix = "DKV";
+
+package dkv;
+
+// The greeting service definition.
+service DkvService {
+
+  // add key
+  rpc AddKey (AddKeyRequest) returns (AddKeyReply) {}
+
+  // get for key
+  rpc GetKey (GetKeyRequest) returns (GetKeyReply) {}
+
+}
+
+message Status {
+  bool success = 1;
+  repeated string msg = 2;
+}
+
+/* -----Add Key----- */
+// The request message to add a key and data
+message ReqAddKeyValue {
+  string key = 1;
+  string data = 2;
+}
+
+message AddKeyRequest {
+  ReqAddKeyValue val = 3;
+  Status status = 2;
+}
+
+// The response message to add key
+message AddKeyReply {
+  Status status = 1;
+}
+
+
+
+/* -----Get Key----- */
+// The request message to get the latest version of a key
+message ReqGetKeyValue {
+  string key = 1;
+}
+
+// The response message to get latest data at key
+message ResGetKeyValue {
+  string key = 1;
+  string data = 2;
+  string version = 3;
+}
+
+
+message GetKeyRequest {
+  ReqGetKeyValue val = 1;
+  Status status = 2;
+}
+
+message GetKeyReply {
+  ResGetKeyValue val = 1;
+  Status status = 2;
+}
+
