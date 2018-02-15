@@ -13,16 +13,24 @@ use grpcio::{ChannelBuilder, EnvBuilder};
 
 // use grpcio_proto::dkv::dkv::HelloRequest;
 // use grpcio_proto::dkv::dkv_grpc::GreeterClient;
+use grpcio_proto::dkv::dkv_grpc::{self, DkvClient};
+use grpcio_proto::dkv::dkv::{
+  Status,
+  AddKeyRequest,
+  GetKeyRequest,
+  GetKeyReply,
+  AddKeyReply
+};
 
 
 fn main() {
-//     let _guard = init_log(None);
-//     let env = Arc::new(EnvBuilder::new().build());
-//     let ch = ChannelBuilder::new(env).connect("localhost:50051");
-//     let client = GreeterClient::new(ch);
+    let _guard = init_log(None);
+    let env = Arc::new(EnvBuilder::new().build());
+    let ch = ChannelBuilder::new(env).connect("localhost:50051");
+    let client = DkvClient::new(ch);
 
-//     let mut req = HelloRequest::new();
+    let mut req = AddKeyRequest::new();
 //     req.set_name("World".to_owned());
-//     let reply = client.say_hello(&req).expect("rpc");
-//     info!("Greeter received: {}", reply.get_message());
+    let reply = client.add_key(&req).expect("rpc");
+    info!("Greeter received: {}", reply.get_status().get_success());
 }

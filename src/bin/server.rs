@@ -18,8 +18,7 @@ use futures::Future;
 use futures::sync::oneshot;
 use grpcio::{Environment, RpcContext, ServerBuilder, UnarySink};
 
-// use grpcio_proto::greeter::helloworld::{HelloReply, HelloRequest};
-use grpcio_proto::dkv::dkv_grpc::{self, DkvService};
+use grpcio_proto::dkv::dkv_grpc::{self, Dkv};
 use grpcio_proto::dkv::dkv::{
   Status,
   AddKeyRequest,
@@ -32,7 +31,7 @@ use grpcio_proto::dkv::dkv::{
 #[derive(Clone)]
 struct MyDkvService;
 
-impl DkvService for MyDkvService {
+impl Dkv for MyDkvService {
     fn add_key(&self, ctx: RpcContext, val: AddKeyRequest, sink: UnarySink<AddKeyReply>) {
         let msg = format!("success!");
         let mut resp = AddKeyReply::new();
@@ -62,7 +61,7 @@ impl DkvService for MyDkvService {
 fn main() {
     let _guard = init_log(None);
     let env = Arc::new(Environment::new(num_cpus::get()));
-    let service = dkv_grpc::create_dkv_service(MyDkvService);
+    let service = dkv_grpc::create_dkv(MyDkvService);
     let mut server = ServerBuilder::new(env)
         .register_service(service)
         .bind("127.0.0.1", 50051)

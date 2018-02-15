@@ -8,7 +8,7 @@ option objc_class_prefix = "DKV";
 package dkv;
 
 // The greeting service definition.
-service DkvService {
+service Dkv {
 
   // add key
   rpc AddKey (AddKeyRequest) returns (AddKeyReply) {}
