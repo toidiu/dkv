@@ -34,7 +34,15 @@ struct MyDkvService;
 
 impl DkvService for MyDkvService {
     fn add_key(&self, ctx: RpcContext, val: AddKeyRequest, sink: UnarySink<AddKeyReply>) {
+        let msg = format!("success!");
+        let mut resp = AddKeyReply::new();
+        let mut status = Status::new();
+        status.set_success(true);
 
+        resp.set_status(status);
+        let f = sink.success(resp)
+            .map_err(move |e| error!("failed to reply {:?}: {:?}", val, e));
+        ctx.spawn(f)
     }
 
     fn get_key(&self, ctx: RpcContext, val: GetKeyRequest, sink: UnarySink<GetKeyReply>) {
