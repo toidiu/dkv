@@ -41,25 +41,21 @@ pub fn init_log(log_file: Option<String>) -> GlobalLoggerGuard {
 //     fn get_key(&self) -> String;
 // }
 pub trait Backend  {
-    // fn add_key(){};
-    // fn get_key(){};
+    fn add_key(&self) -> String;
+    fn get_key(&self) -> String;
 }
-
-// unsafe impl Sync for Backend {
-
-// }
 
 pub struct S3 {
 
 }
 
 impl Backend for S3 {
-    // fn get_key() -> String {
-    //     "".to_string()
-    // }
+    fn get_key(&self) -> String {
+        "".to_string()
+    }
 
-    // fn add_key() -> String {
-    //     "".to_string()
-    // }
+    fn add_key(&self) -> String {
+        "".to_string()
+    }
 
 }
