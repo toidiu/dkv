@@ -1,3 +1,5 @@
+#![allow(unused)]
+
 extern crate slog;
 extern crate slog_async;
 extern crate slog_stdlog;
@@ -9,6 +11,10 @@ use std::fs::File;
 use self::slog::{Drain, Logger, OwnedKV};
 use self::slog_scope::GlobalLoggerGuard;
 use self::slog_term::{Decorator, FullFormat, PlainSyncDecorator, TermDecorator};
+
+macro_rules! unimplemented {
+        (  ) => { ... };
+}
 
 pub fn init_log(log_file: Option<String>) -> GlobalLoggerGuard {
     fn setup<D: Decorator + Send + 'static>(decorator: D) -> GlobalLoggerGuard {
@@ -27,4 +33,33 @@ pub fn init_log(log_file: Option<String>) -> GlobalLoggerGuard {
         }
         None => setup(TermDecorator::new().build()),
     }
+}
+
+
+// pub trait Backend {
+//     fn add_key(&self) -> String;
+//     fn get_key(&self) -> String;
+// }
+pub trait Backend  {
+    // fn add_key(){};
+    // fn get_key(){};
+}
+
+// unsafe impl Sync for Backend {
+
+// }
+
+pub struct S3 {
+
+}
+
+impl Backend for S3 {
+    // fn get_key() -> String {
+    //     "".to_string()
+    // }
+
+    // fn add_key() -> String {
+    //     "".to_string()
+    // }
+
 }

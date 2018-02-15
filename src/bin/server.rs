@@ -1,6 +1,7 @@
 #![allow(unused)]
 #![allow(unknown_lints)]
 #![allow(unreadable_literal)]
+#![feature(underscore_lifetimes)]
 
 extern crate futures;
 extern crate grpcio;
@@ -29,9 +30,20 @@ use grpcio_proto::dkv::dkv::{
 
 
 #[derive(Clone)]
-struct MyDkvService;
+struct MyDkvService {
+    backends: Arc<Vec<Box<dkv::Backend + Send + Sync>>>,
+}
+
+// impl MyDkvService<'a> {
+//     fn new() -> Self {
+//         MyDkvService {
+//             backends : vec![],
+//         }
+//     }
+// }
 
 impl Dkv for MyDkvService {
+
     fn add_key(&self, ctx: RpcContext, val: AddKeyRequest, sink: UnarySink<AddKeyReply>) {
         let msg = format!("success!");
         let mut resp = AddKeyReply::new();
@@ -61,7 +73,8 @@ impl Dkv for MyDkvService {
 fn main() {
     let _guard = init_log(None);
     let env = Arc::new(Environment::new(num_cpus::get()));
-    let service = dkv_grpc::create_dkv(MyDkvService);
+    let backends: Arc<Vec<Box<dkv::Backend + Sync + Send>>> = Arc::new(Vec::new());
+    let service = dkv_grpc::create_dkv(MyDkvService{ backends });
     let mut server = ServerBuilder::new(env)
         .register_service(service)
         .bind("127.0.0.1", 50051)
