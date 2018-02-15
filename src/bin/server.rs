@@ -5,8 +5,8 @@
 extern crate futures;
 extern crate grpcio;
 extern crate grpcio_proto;
-#[macro_use]
-extern crate log;
+#[macro_use] extern crate log;
+extern crate num_cpus;
 extern crate dkv;
 
 use dkv::init_log;
@@ -30,9 +30,9 @@ use grpcio_proto::dkv::dkv::{
 
 
 #[derive(Clone)]
-struct GreeterService;
+struct MyDkvService;
 
-impl DkvService for GreeterService {
+impl DkvService for MyDkvService {
     fn add_key(&self, ctx: RpcContext, val: AddKeyRequest, sink: UnarySink<AddKeyReply>) {
 
     }
@@ -53,23 +53,23 @@ impl DkvService for GreeterService {
 
 fn main() {
     let _guard = init_log(None);
-    // let env = Arc::new(Environment::new(1));
-    // let service = helloworld_grpc::create_greeter(GreeterService);
-    // let mut server = ServerBuilder::new(env)
-    //     .register_service(service)
-    //     .bind("127.0.0.1", 50051)
-    //     .build()
-    //     .unwrap();
-    // server.start();
-    // for &(ref host, port) in server.bind_addrs() {
-    //     info!("listening on {}:{}", host, port);
-    // }
-    // let (tx, rx) = oneshot::channel();
-    // thread::spawn(move || {
-    //     info!("Press ENTER to exit...");
-    //     let _ = io::stdin().read(&mut [0]).unwrap();
-    //     tx.send(())
-    // });
-    // let _ = rx.wait();
-    // let _ = server.shutdown().wait();
+    let env = Arc::new(Environment::new(num_cpus::get()));
+    let service = dkv_grpc::create_dkv_service(MyDkvService);
+    let mut server = ServerBuilder::new(env)
+        .register_service(service)
+        .bind("127.0.0.1", 50051)
+        .build()
+        .unwrap();
+    server.start();
+    for &(ref host, port) in server.bind_addrs() {
+        info!("listening on {}:{}", host, port);
+    }
+    let (tx, rx) = oneshot::channel();
+    thread::spawn(move || {
+        info!("Press ENTER to exit...");
+        let _ = io::stdin().read(&mut [0]).unwrap();
+        tx.send(())
+    });
+    let _ = rx.wait();
+    let _ = server.shutdown().wait();
 }
