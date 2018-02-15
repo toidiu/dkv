@@ -45,17 +45,17 @@ impl Dkv for MyDkvService {
     }
 
     fn get_key(&self, ctx: RpcContext, val: GetKeyRequest, sink: UnarySink<GetKeyReply>) {
+        let msg = format!("success!");
+        let mut resp = GetKeyReply::new();
+        let mut status = Status::new();
+        status.set_success(true);
 
+        resp.set_status(status);
+        let f = sink.success(resp)
+            .map_err(move |e| error!("failed to reply {:?}: {:?}", val, e));
+        ctx.spawn(f)
     }
 
-    // fn say_hello(&self, ctx: RpcContext, req: HelloRequest, sink: UnarySink<HelloReply>) {
-    //     let msg = format!("Hello {}!", req.get_name());
-    //     let mut resp = HelloReply::new();
-    //     resp.set_message(msg);
-    //     let f = sink.success(resp)
-    //         .map_err(move |e| error!("failed to reply {:?}: {:?}", req, e));
-    //     ctx.spawn(f)
-    // }
 }
 
 fn main() {

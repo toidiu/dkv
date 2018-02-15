@@ -25,14 +25,10 @@ message Status {
 
 /* -----Add Key----- */
 // The request message to add a key and data
-message ReqAddKeyValue {
-  string key = 1;
-  string data = 2;
-}
 
 message AddKeyRequest {
-  ReqAddKeyValue val = 3;
-  Status status = 2;
+  string key = 1;
+  string data = 2;
 }
 
 // The response message to add key
@@ -43,10 +39,6 @@ message AddKeyReply {
 
 
 /* -----Get Key----- */
-// The request message to get the latest version of a key
-message ReqGetKeyValue {
-  string key = 1;
-}
 
 // The response message to get latest data at key
 message ResGetKeyValue {
@@ -56,9 +48,9 @@ message ResGetKeyValue {
 }
 
 
+// The request message to get the latest version of a key
 message GetKeyRequest {
-  ReqGetKeyValue val = 1;
-  Status status = 2;
+  string key = 1;
 }
 
 message GetKeyReply {

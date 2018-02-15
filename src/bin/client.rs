@@ -11,8 +11,6 @@ use std::sync::Arc;
 use dkv::init_log;
 use grpcio::{ChannelBuilder, EnvBuilder};
 
-// use grpcio_proto::dkv::dkv::HelloRequest;
-// use grpcio_proto::dkv::dkv_grpc::GreeterClient;
 use grpcio_proto::dkv::dkv_grpc::{self, DkvClient};
 use grpcio_proto::dkv::dkv::{
   Status,
@@ -30,7 +28,8 @@ fn main() {
     let client = DkvClient::new(ch);
 
     let mut req = AddKeyRequest::new();
-//     req.set_name("World".to_owned());
+    req.set_key("key1".to_string());
+    req.set_data("data1".to_string());
     let reply = client.add_key(&req).expect("rpc");
     info!("Greeter received: {}", reply.get_status().get_success());
 }
