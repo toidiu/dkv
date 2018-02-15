@@ -21,11 +21,12 @@ use grpcio::{Environment, RpcContext, ServerBuilder, UnarySink};
 
 use grpcio_proto::dkv::dkv_grpc::{self, Dkv};
 use grpcio_proto::dkv::dkv::{
-  Status,
-  AddKeyRequest,
-  GetKeyRequest,
-  GetKeyReply,
-  AddKeyReply
+    Status,
+    AddKeyRequest,
+    GetKeyRequest,
+    GetKeyReply,
+    ResGetKeyValue,
+    AddKeyReply
 };
 
 
@@ -39,29 +40,40 @@ struct MyDkvService {
 
 impl Dkv for MyDkvService {
 
-    fn add_key(&self, ctx: RpcContext, val: AddKeyRequest, sink: UnarySink<AddKeyReply>) {
+    fn add_key(&self, ctx: RpcContext, req: AddKeyRequest, sink: UnarySink<AddKeyReply>) {
         let msg = format!("success!");
         let mut resp = AddKeyReply::new();
         let mut status = Status::new();
-        status.set_success(true);
 
-        dkv::distributed_add(Arc::clone(&self.backends));
+        let add_status = dkv::distributed_add(Arc::clone(&self.backends));
+        status.set_success(add_status);
 
         resp.set_status(status);
         let f = sink.success(resp)
-            .map_err(move |e| error!("failed to reply {:?}: {:?}", val, e));
+            .map_err(move |e| error!("failed to reply {:?}: {:?}", req, e));
         ctx.spawn(f)
     }
 
-    fn get_key(&self, ctx: RpcContext, val: GetKeyRequest, sink: UnarySink<GetKeyReply>) {
+    fn get_key(&self, ctx: RpcContext, req: GetKeyRequest, sink: UnarySink<GetKeyReply>) {
         let msg = format!("success!");
         let mut resp = GetKeyReply::new();
+
         let mut status = Status::new();
-        status.set_success(true);
+
+        match dkv::distributed_get(Arc::clone(&self.backends)) {
+            Ok(val) => {
+                status.set_success(true);
+                resp.set_val(val);
+            },
+
+            Err(e) => {
+                status.set_success(false);
+            },
+        }
 
         resp.set_status(status);
         let f = sink.success(resp)
-            .map_err(move |e| error!("failed to reply {:?}: {:?}", val, e));
+            .map_err(move |e| error!("failed to reply {:?}: {:?}", req, e));
         ctx.spawn(f)
     }
 
