@@ -31,5 +31,10 @@ fn main() {
     req.set_key("key1".to_string());
     req.set_data("data1".to_string());
     let reply = client.add_key(&req).expect("rpc");
-    info!("Greeter received: {}", reply.get_status().get_success());
+    info!("Status of add was: {}", reply.get_status().get_success());
+
+    let mut req = GetKeyRequest::new();
+    let reply = client.get_key(&req).expect("rpc");
+    info!("Status of get was: {} and value was: {:?}", reply.get_status().get_success(), reply.get_val());
+
 }

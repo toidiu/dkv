@@ -66,8 +66,9 @@ impl Dkv for MyDkvService {
                 resp.set_val(val);
             },
 
-            Err(e) => {
+            Err(e_msg) => {
                 status.set_success(false);
+                status.set_msg(e_msg);
             },
         }
 
