@@ -31,6 +31,9 @@ use grpcio_proto::dkv::dkv::{
 
 #[derive(Clone)]
 struct MyDkvService {
+    // FIXME: using Arc for simplification but we will be managing locking
+    // outselves so there can be awrapper type around Vec that implements
+    // Send + Sync and doesnt need to do an atomic lock
     backends: Arc<Vec<Box<dkv::Backend + Send + Sync>>>,
 }
 
@@ -41,6 +44,8 @@ impl Dkv for MyDkvService {
         let mut resp = AddKeyReply::new();
         let mut status = Status::new();
         status.set_success(true);
+
+        dkv::distributed_add(Arc::clone(&self.backends));
 
         resp.set_status(status);
         let f = sink.success(resp)
@@ -65,6 +70,7 @@ impl Dkv for MyDkvService {
 fn main() {
     let _guard = init_log(None);
     let env = Arc::new(Environment::new(num_cpus::get()));
+
     let my_service = MyDkvService {
         backends : Arc::new(Vec::new())
     };

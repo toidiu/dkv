@@ -7,6 +7,7 @@ extern crate slog_scope;
 extern crate slog_term;
 
 use std::fs::File;
+use std::sync::Arc;
 
 use self::slog::{Drain, Logger, OwnedKV};
 use self::slog_scope::GlobalLoggerGuard;
@@ -36,13 +37,10 @@ pub fn init_log(log_file: Option<String>) -> GlobalLoggerGuard {
 }
 
 
-// pub trait Backend {
-//     fn add_key(&self) -> String;
-//     fn get_key(&self) -> String;
-// }
 pub trait Backend  {
-    fn add_key(&self) -> String;
-    fn get_key(&self) -> String;
+    fn add_key(&self) -> bool;
+    // fn get_key(&self) -> String;
+
 }
 
 pub struct S3 {
@@ -50,12 +48,26 @@ pub struct S3 {
 }
 
 impl Backend for S3 {
-    fn get_key(&self) -> String {
-        "".to_string()
+    fn add_key(&self) -> bool {
+        true
     }
 
-    fn add_key(&self) -> String {
-        "".to_string()
-    }
+    // fn get_key(&self) -> String {
+    //     "".to_string()
+    // }
+
 
 }
+
+
+pub fn distributed_add(backends: Arc<Vec<Box<Backend + Send + Sync>>>) -> bool {
+    
+
+    true
+}
+
+// fn distributed_get () {
+
+// }
+
+
