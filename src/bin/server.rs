@@ -43,25 +43,22 @@ struct MyDkvService {
 
 impl Dkv for MyDkvService {
     fn add_key(&self, ctx: RpcContext, req: AddKeyRequest, sink: UnarySink<AddKeyReply>) {
-        // let msg = format!("success!");
-        // let mut resp = AddKeyReply::new();
-        // let mut status = Status::new();
+        let msg = format!("success!");
+        let mut resp = AddKeyReply::new();
+        let mut status = Status::new();
 
-        // let add_status = distributed::distributed_add(
-        //     req.clone(),
-        //     self.total_backends,
-        //     self.backends.clone(),
-        // );
-        // if let Ok(_) = add_status {
-        //     status.set_success(true);
-        // } else {
-        //     status.set_success(false);
-        // }
+        let add_status =
+            distributed::distributed_add(req.clone(), self.total_backends, self.backends.clone());
+        if let Ok(_) = add_status {
+            status.set_success(true);
+        } else {
+            status.set_success(false);
+        }
 
-        // resp.set_status(status);
-        // let f = sink.success(resp)
-        //     .map_err(move |e| error!("failed to reply {:?}: {:?}", req, e));
-        // ctx.spawn(f)
+        resp.set_status(status);
+        let f = sink.success(resp)
+            .map_err(move |e| error!("failed to reply {:?}: {:?}", req, e));
+        ctx.spawn(f)
     }
 
     fn get_key(&self, ctx: RpcContext, req: GetKeyRequest, sink: UnarySink<GetKeyReply>) {
