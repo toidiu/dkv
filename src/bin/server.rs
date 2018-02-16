@@ -64,7 +64,11 @@ impl Dkv for MyDkvService {
 
         let mut status = Status::new();
 
-        match dkv::distributed_get(self.total_backends, Arc::clone(&self.backends)) {
+        match dkv::distributed_get(
+            req.get_key().to_string(),
+            self.total_backends,
+            Arc::clone(&self.backends)
+            ) {
             Ok(val) => {
                 status.set_success(true);
                 resp.set_val(val);
