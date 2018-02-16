@@ -33,7 +33,7 @@ struct MyDkvService {
     /// In the current implementation we only lose the multi threaded
     /// benefit of a single instance of the server but the distributed
     /// logic of multiple servers will still work.
-    backends: Arc<Vec<Box<dkv::BkSend>>>,
+    backends: Arc<Vec<Box<dkv::backend::BkSend>>>,
 
     total_backends: usize,
 }
@@ -44,8 +44,11 @@ impl Dkv for MyDkvService {
         let mut resp = AddKeyReply::new();
         let mut status = Status::new();
 
-        let add_status =
-            dkv::distributed_add(req.clone(), self.total_backends, Arc::clone(&self.backends));
+        let add_status = dkv::distributed::distributed_add(
+            req.clone(),
+            self.total_backends,
+            Arc::clone(&self.backends),
+        );
         if let Ok(_) = add_status {
             status.set_success(true);
         } else {
@@ -64,7 +67,7 @@ impl Dkv for MyDkvService {
 
         let mut status = Status::new();
 
-        match dkv::distributed_get(
+        match dkv::distributed::distributed_get(
             req.get_key().to_string(),
             self.total_backends,
             Arc::clone(&self.backends),
