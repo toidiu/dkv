@@ -10,6 +10,7 @@ extern crate protobuf;
 
 use std::fs::File;
 use std::sync::Arc;
+use std::collections::HashMap;
 
 use protobuf::repeated::RepeatedField;
 
@@ -43,17 +44,20 @@ pub fn init_log(log_file: Option<String>) -> GlobalLoggerGuard {
 
 pub type BkSend = Backend + Send + Sync;
 
-pub trait Backend  {
+pub trait Backend {
+
+    //== must be unique
+    fn id(&self) -> String;
 
     //== 'key.version' file that stores data for that particular version
     // this is always the next version
-    fn add_key(&self, data: &AddKeyRequest) -> bool;
+    fn add_key(&self, data: &AddKeyRequest, obj_name: String) -> bool;
     // this is always the lates version for now
     fn get_key(&self) -> String;
 
     //== 'key.meta' file that stores all information about kv
     fn get_meta(&self) -> String;
-    fn set_meta(&self) -> bool;
+    fn set_meta(&self, meta: String, obj_name: String) -> bool;
 
     //== 'key.lock' that indicates atomic access
     // this needs to be an atomic operation
@@ -72,7 +76,7 @@ pub fn distributed_add(
     data: AddKeyRequest,
     total_backends: usize,
     arc_backends: Arc<Vec<Box<BkSend>>>
-) -> bool {
+) -> Result<Vec<Box<BkSend>>, String> {
 
     //== attempt to acquire Arc
     let mut bk_list = Vec::new();
@@ -81,7 +85,7 @@ pub fn distributed_add(
     match Arc::try_unwrap(arc_backends) {
         Ok(b_vec) => bk_list = b_vec,
 
-        Err(e) => return false
+        Err(e) => return Err("unable to acquire Arc".to_string())
     }
 
     //== attempt to acquire locks
@@ -98,30 +102,60 @@ pub fn distributed_add(
         for bk in bk_locks {
             bk.release_lock();
         }
-        return false
+        return Err("unable to acquire enough locks".to_string())
     }
 
 
-    //== we have enough locks so lets try to add value
-    let mut meta_list: Vec<(Box<BkSend>, usize)> = Vec::new();
-    for bk in bk_locks {
-        // get meta.version
-        let meta = bk.get_meta();
-        let version = 1; // fake for now
-        meta_list.push((bk, version));
+    //== figure out which backend had the latest data.
+    let mut max_version = 0;
+    let mut latest_backend_id: String = "".to_string();
+    let mut bkid_ver_map: HashMap<String, usize> = HashMap::new();
+    let mut bkid_meta_map: HashMap<String, String> = HashMap::new();
+    {
+        //== we have enough locks so lets try to add value
+        //FIXME make this concurrent
+        for bk in &bk_locks {
+            // get meta.version
+            let meta = bk.get_meta();
+            let version = 1; //FIXME fake for now
+            bkid_meta_map.insert(bk.id(), meta);
+            bkid_ver_map.insert(bk.id(), version);
+        }
+
+        //== compare versions
+        for (bk_id, ver) in &bkid_ver_map {
+            if *ver > max_version {
+                max_version = *ver;
+                latest_backend_id = bk_id.clone();
+            }
+        }
     }
 
-    // for bk in bk_locks {
-    //     // set data /w key.version++
-    //     bk.add_key(data);
+    //== Add the data with the latest version++ to
+    // all the backends
+    for bk in &bk_locks {
 
-    //     // set meta.append(new version info)
-    //     let meta = meta;//.version++;
+        // save data
+        let file_name = format!("{}.{}", data.get_key(), max_version);
+        bk.add_key(&data, file_name);
 
-    //     // release lock
-    // }
+        // get meta and append new version info
+        let meta = bkid_meta_map
+            .get(&bk.id())
+            .expect("should exist")
+            .to_owned();
+        //FIXME
+        let meta = format!("{} {}", meta, latest_backend_id);
 
-    true
+        // save meta
+        let meta_file_name = format!("{}.{}", data.get_key(), max_version);
+        bk.set_meta(meta, meta_file_name);
+
+        // release lock
+        bk.release_lock();
+    }
+
+    Ok(bk_locks)
 }
 
 pub fn distributed_get(

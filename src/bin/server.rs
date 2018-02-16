@@ -57,7 +57,11 @@ impl Dkv for MyDkvService {
             self.total_backends,
             Arc::clone(&self.backends)
         );
-        status.set_success(add_status);
+        if let Ok(_) = add_status {
+            status.set_success(true);
+        } else {
+            status.set_success(false);
+        }
 
         resp.set_status(status);
         let f = sink.success(resp)
