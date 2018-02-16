@@ -51,20 +51,29 @@ pub fn distributed_add(
                 .get(bk_id)
                 .unwrap()
                 .get_meta(data.get_key().to_string());
-            let version =  meta.latest_version;
+            println!("{:?}", meta);
+            let version = meta.latest_version;
+
+            println!("======ver {}", version);
+            if max_version < version {
+                max_version = version
+            }
+
             bkid_meta_map.insert(bk_map.get(bk_id).unwrap().id(), meta);
             bkid_ver_map.insert(bk_map.get(bk_id).unwrap().id(), version);
         }
 
-        //== compare versions
-        for (bk_id, ver) in &bkid_ver_map {
-            if *ver > max_version {
-                max_version = *ver;
-                bk_id_latest = bk_id.clone();
-            }
-        }
+        ////== compare versions
+        //for (bk_id, ver) in &bkid_ver_map {
+        //    if *ver > max_version {
+        //        max_version = *ver;
+        //        bk_id_latest = bk_id.clone();
+        //    }
+        //}
     }
 
+    println!("======max {}", max_version);
+    let max_version = max_version + 1;
     //== Add the data with the latest version++ to
     // all the backends
     for bk_id in &bk_id_locks {
@@ -74,19 +83,23 @@ pub fn distributed_add(
 
         // get meta and append new version info
         let meta = bkid_meta_map.get_mut(bk_id).expect("should exist");
-        meta.add_version(max_version + 1);
+        println!("======max {}", max_version);
+        meta.add_version(max_version);
+        println!("======meta {:?}", meta);
 
         // save meta
-        let meta_file_name = format!("{}.info", data.get_key());
         bk_map
             .get(bk_id)
             .unwrap()
-            .set_meta(meta.to_string(), meta_file_name);
+            .set_meta(meta.to_string(), data.get_key().to_string());
     }
 
     //== release lock
     for bk_id in &bk_id_locks {
-        bk_map.get(bk_id).unwrap().release_lock(bk_id.to_string());
+        bk_map
+            .get(bk_id)
+            .unwrap()
+            .release_lock(data.get_key().to_string());
     }
 
     Ok(bk_id_locks)

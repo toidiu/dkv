@@ -41,7 +41,7 @@ pub struct BkMeta {
 impl BkMeta {
     pub fn init() -> Self {
         BkMeta {
-            latest_version: 1,
+            latest_version: 0,
             versions: Vec::new(),
         }
     }
@@ -64,13 +64,5 @@ impl BkMeta {
 impl ToString for BkMeta {
     fn to_string(&self) -> String {
         serde_json::to_string(self).unwrap()
-    }
-}
-
-impl FromStr for BkMeta {
-    type Err = String;
-
-    fn from_str(s: &str) -> Result<Self, Self::Err> {
-        serde_json::from_str(s).unwrap()
     }
 }
