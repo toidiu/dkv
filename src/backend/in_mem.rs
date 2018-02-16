@@ -1,11 +1,23 @@
 use grpcio_proto::dkv::dkv::{AddKeyRequest, ResGetKeyValue};
 
-pub struct InMem {}
+pub struct InMem {
+    id: String,
+}
+
+impl InMem {
+    pub fn new(id: String) -> Self {
+        InMem { id }
+    }
+
+    pub fn get_id(&self) -> String {
+        self.id.clone()
+    }
+}
 
 impl ::backend::Backend for InMem {
     //== must be unique
     fn id(&self) -> String {
-        "in-mem".to_string()
+        self.id.clone()
     }
 
     //== 'key.version' file that stores data for that particular version

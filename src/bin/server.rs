@@ -11,9 +11,12 @@ extern crate grpcio_proto;
 extern crate log;
 extern crate num_cpus;
 
+use std::collections::HashMap;
+use dkv::distributed;
+use dkv::backend;
 use dkv::init_log;
 use std::io::Read;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::{io, thread};
 
 use futures::Future;
@@ -33,32 +36,32 @@ struct MyDkvService {
     /// In the current implementation we only lose the multi threaded
     /// benefit of a single instance of the server but the distributed
     /// logic of multiple servers will still work.
-    backends: Arc<Vec<Box<dkv::backend::BkSend>>>,
+    backends: Arc<Mutex<HashMap<String, Box<backend::BkSend>>>>,
 
     total_backends: usize,
 }
 
 impl Dkv for MyDkvService {
     fn add_key(&self, ctx: RpcContext, req: AddKeyRequest, sink: UnarySink<AddKeyReply>) {
-        let msg = format!("success!");
-        let mut resp = AddKeyReply::new();
-        let mut status = Status::new();
+        // let msg = format!("success!");
+        // let mut resp = AddKeyReply::new();
+        // let mut status = Status::new();
 
-        let add_status = dkv::distributed::distributed_add(
-            req.clone(),
-            self.total_backends,
-            Arc::clone(&self.backends),
-        );
-        if let Ok(_) = add_status {
-            status.set_success(true);
-        } else {
-            status.set_success(false);
-        }
+        // let add_status = distributed::distributed_add(
+        //     req.clone(),
+        //     self.total_backends,
+        //     self.backends.clone(),
+        // );
+        // if let Ok(_) = add_status {
+        //     status.set_success(true);
+        // } else {
+        //     status.set_success(false);
+        // }
 
-        resp.set_status(status);
-        let f = sink.success(resp)
-            .map_err(move |e| error!("failed to reply {:?}: {:?}", req, e));
-        ctx.spawn(f)
+        // resp.set_status(status);
+        // let f = sink.success(resp)
+        //     .map_err(move |e| error!("failed to reply {:?}: {:?}", req, e));
+        // ctx.spawn(f)
     }
 
     fn get_key(&self, ctx: RpcContext, req: GetKeyRequest, sink: UnarySink<GetKeyReply>) {
@@ -67,10 +70,10 @@ impl Dkv for MyDkvService {
 
         let mut status = Status::new();
 
-        match dkv::distributed::distributed_get(
+        match distributed::distributed_get(
             req.get_key().to_string(),
             self.total_backends,
-            Arc::clone(&self.backends),
+            self.backends.clone(),
         ) {
             Ok(val) => {
                 status.set_success(true);
@@ -94,12 +97,17 @@ fn main() {
     let _guard = init_log(None);
     let env = Arc::new(Environment::new(num_cpus::get()));
 
-    let total_backends = 2;
+    let total_backends = 1;
+    let bk_in_mem = backend::in_mem::InMem::new("in-mem".to_string());
+
+    let mut map: HashMap<String, Box<backend::BkSend>> = HashMap::new();
+    map.insert(bk_in_mem.get_id(), Box::new(bk_in_mem));
+
     let my_service = MyDkvService {
-        backends: Arc::new(Vec::new()),
+        // backends: Arc::new(vec![bk_in_mem]),
+        backends: Arc::new(Mutex::new(map)),
         total_backends: total_backends,
     };
-    // FIXME
 
     let service = dkv_grpc::create_dkv(my_service);
     let mut server = ServerBuilder::new(env)

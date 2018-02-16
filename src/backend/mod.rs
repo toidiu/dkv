@@ -2,7 +2,7 @@ use grpcio_proto::dkv::dkv::{AddKeyRequest, ResGetKeyValue};
 
 pub type BkSend = Backend + Send + Sync;
 
-mod in_mem;
+pub mod in_mem;
 
 pub trait Backend {
     //== must be unique
