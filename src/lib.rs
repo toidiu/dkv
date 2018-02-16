@@ -17,7 +17,10 @@ use self::slog::{Drain, Logger, OwnedKV};
 use self::slog_scope::GlobalLoggerGuard;
 use self::slog_term::{Decorator, FullFormat, PlainSyncDecorator, TermDecorator};
 
-use grpcio_proto::dkv::dkv::ResGetKeyValue;
+use grpcio_proto::dkv::dkv::{
+    ResGetKeyValue,
+    AddKeyRequest,
+};
 
 pub fn init_log(log_file: Option<String>) -> GlobalLoggerGuard {
     fn setup<D: Decorator + Send + 'static>(decorator: D) -> GlobalLoggerGuard {
@@ -38,40 +41,93 @@ pub fn init_log(log_file: Option<String>) -> GlobalLoggerGuard {
     }
 }
 
+pub type BkSend = Backend + Send + Sync;
 
 pub trait Backend  {
 
-    // 'key.version' file that stores data for that particular version
-    fn add_key(&self) -> bool;
-    // fn get_key(&self) -> String;
-    //
-    // 'key.info' file that stores all information about kv
-    // fn get_meta(&self) -> String;
-    // fn set_meta(&self) -> String;
-    //
-    // 'key.lock' that indicates atomic access
-    // fn get_lock(&self);
-    // fn set_lock(&self);
+    //== 'key.version' file that stores data for that particular version
+    // this is always the next version
+    fn add_key(&self, data: &AddKeyRequest) -> bool;
+    // this is always the lates version for now
+    fn get_key(&self) -> String;
 
+    //== 'key.meta' file that stores all information about kv
+    fn get_meta(&self) -> String;
+    fn set_meta(&self) -> bool;
+
+    //== 'key.lock' that indicates atomic access
+    // this needs to be an atomic operation
+    fn acquire_lock(&self) -> bool;
+    fn release_lock(&self) -> bool;
 }
 
-pub struct S3 {
+// pub struct S3 {
+// }
 
-}
+// impl Backend for S3 {
+// }
 
-impl Backend for S3 {
-    fn add_key(&self) -> bool {
-        true
+
+pub fn distributed_add(
+    data: AddKeyRequest,
+    total_backends: usize,
+    arc_backends: Arc<Vec<Box<BkSend>>>
+) -> bool {
+
+    //== attempt to acquire Arc
+    let mut bk_list = Vec::new();
+    // See if we can acquire Arc else fail... this should go away once we 
+    // replace Arc with custom wrapper
+    match Arc::try_unwrap(arc_backends) {
+        Ok(b_vec) => bk_list = b_vec,
+
+        Err(e) => return false
     }
 
-}
+    //== attempt to acquire locks
+    let mut bk_locks: Vec<Box<BkSend>> = Vec::new();
+    for bk in bk_list {
+        // acquire lock
+        if bk.acquire_lock() {
+            bk_locks.push(bk);
+        };
+    }
+
+    //== if we dont have enough locks then release all locks and abort
+    if bk_locks.len() <= total_backends/2 {
+        for bk in bk_locks {
+            bk.release_lock();
+        }
+        return false
+    }
 
 
-pub fn distributed_add(backends: Arc<Vec<Box<Backend + Send + Sync>>>) -> bool {
+    //== we have enough locks so lets try to add value
+    let mut meta_list: Vec<(Box<BkSend>, usize)> = Vec::new();
+    for bk in bk_locks {
+        // get meta.version
+        let meta = bk.get_meta();
+        let version = 1; // fake for now
+        meta_list.push((bk, version));
+    }
+
+    // for bk in bk_locks {
+    //     // set data /w key.version++
+    //     bk.add_key(data);
+
+    //     // set meta.append(new version info)
+    //     let meta = meta;//.version++;
+
+    //     // release lock
+    // }
+
     true
 }
 
-pub fn distributed_get(backends: Arc<Vec<Box<Backend + Send + Sync>>>) -> Result<ResGetKeyValue, RepeatedField<String>> {
+pub fn distributed_get(
+    total_backends: usize,
+    arc_backends: Arc<Vec<Box<BkSend>>>
+    ) -> Result<ResGetKeyValue, RepeatedField<String>> {
     let mut val = ResGetKeyValue::new();
     val.set_data("this is fake data".to_string());
     val.set_version("this is fake version".to_string());

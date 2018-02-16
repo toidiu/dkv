@@ -32,10 +32,17 @@ use grpcio_proto::dkv::dkv::{
 
 #[derive(Clone)]
 struct MyDkvService {
-    // FIXME: using Arc for simplification but we will be managing locking
-    // outselves so there can be awrapper type around Vec that implements
-    // Send + Sync and doesnt need to do an atomic lock
-    backends: Arc<Vec<Box<dkv::Backend + Send + Sync>>>,
+    /// FIXME: using Arc for simplification but we will be managing locking
+    /// ourselves so there can be a wrapper type around Vec that implements
+    /// Send + Sync and doesnt need to do an atomic lock.
+    ///
+    /// In the current implementation we only lose the multi threaded
+    /// benefit of a single instance of the server but the distributed
+    /// logic of multiple servers will still work.
+    backends: Arc<Vec<Box<dkv::BkSend>>>,
+
+    total_backends: usize,
+
 }
 
 impl Dkv for MyDkvService {
@@ -45,7 +52,11 @@ impl Dkv for MyDkvService {
         let mut resp = AddKeyReply::new();
         let mut status = Status::new();
 
-        let add_status = dkv::distributed_add(Arc::clone(&self.backends));
+        let add_status = dkv::distributed_add(
+            req.clone(),
+            self.total_backends,
+            Arc::clone(&self.backends)
+        );
         status.set_success(add_status);
 
         resp.set_status(status);
@@ -60,7 +71,7 @@ impl Dkv for MyDkvService {
 
         let mut status = Status::new();
 
-        match dkv::distributed_get(Arc::clone(&self.backends)) {
+        match dkv::distributed_get(self.total_backends, Arc::clone(&self.backends)) {
             Ok(val) => {
                 status.set_success(true);
                 resp.set_val(val);
@@ -84,9 +95,13 @@ fn main() {
     let _guard = init_log(None);
     let env = Arc::new(Environment::new(num_cpus::get()));
 
+    let total_backends = 2;
     let my_service = MyDkvService {
-        backends : Arc::new(Vec::new())
+        backends : Arc::new(Vec::new()),
+        total_backends: total_backends,
     };
+    // FIXME
+
     let service = dkv_grpc::create_dkv(my_service);
     let mut server = ServerBuilder::new(env)
         .register_service(service)
