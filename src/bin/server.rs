@@ -38,7 +38,7 @@ struct MyDkvService {
     /// logic of multiple servers will still work.
     backends: Arc<Mutex<HashMap<String, Box<backend::BkSend>>>>,
 
-    total_backends: usize,
+    total_backends: u32,
 }
 
 impl Dkv for MyDkvService {

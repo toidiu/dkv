@@ -3,11 +3,11 @@ use std::collections::HashMap;
 use protobuf::repeated::RepeatedField;
 use grpcio_proto::dkv::dkv::{AddKeyRequest, ResGetKeyValue};
 
-use backend::BkSend;
+use backend::{BkMeta, BkSend};
 
 pub fn distributed_add(
     data: AddKeyRequest,
-    total_backends: usize,
+    total_backends: u32,
     arc_backends: Arc<Mutex<HashMap<String, Box<BkSend>>>>,
     // arc_backends: Arc<Vec<Box<BkSend>>>,
 ) -> Result<Vec<String>, RepeatedField<String>> {
@@ -24,7 +24,7 @@ pub fn distributed_add(
     }
 
     //== if we dont have enough locks then release all locks and abort
-    if bk_id_locks.len() <= total_backends / 2 {
+    if bk_id_locks.len() as u32 <= (total_backends / 2) {
         for bk_id in &bk_id_locks {
             bk_map
                 .get(bk_id)
@@ -40,9 +40,9 @@ pub fn distributed_add(
     //== figure out which backend had the latest data.
     let mut max_version = 0;
     let mut bk_id_latest: String = "".to_string();
-    let mut bkid_meta_map: HashMap<String, String> = HashMap::new();
+    let mut bkid_meta_map: HashMap<String, BkMeta> = HashMap::new();
     {
-        let mut bkid_ver_map: HashMap<String, usize> = HashMap::new();
+        let mut bkid_ver_map: HashMap<String, u32> = HashMap::new();
         //== we have enough locks so lets try to add value
         //FIXME make this concurrent
         for bk_id in &bk_id_locks {
@@ -51,8 +51,8 @@ pub fn distributed_add(
                 .get(bk_id)
                 .unwrap()
                 .get_meta(data.get_key().to_string());
-            let version = 10; //FIXME fake for now
-            bkid_meta_map.insert(bk_map.get(bk_id).unwrap().id(), meta.to_string());
+            let version =  meta.latest_version;
+            bkid_meta_map.insert(bk_map.get(bk_id).unwrap().id(), meta);
             bkid_ver_map.insert(bk_map.get(bk_id).unwrap().id(), version);
         }
 
@@ -73,16 +73,15 @@ pub fn distributed_add(
         bk_map.get(bk_id).unwrap().add_key(&data, file_name);
 
         // get meta and append new version info
-        let meta = bkid_meta_map.get(bk_id).expect("should exist").to_owned();
-        //FIXME use serde to format the data and store it
-        let updated_meta = format!("{}:{}", meta, max_version);
+        let meta = bkid_meta_map.get_mut(bk_id).expect("should exist");
+        meta.add_version(max_version + 1);
 
         // save meta
-        let meta_file_name = format!("{}.{}", data.get_key(), max_version);
+        let meta_file_name = format!("{}.info", data.get_key());
         bk_map
             .get(bk_id)
             .unwrap()
-            .set_meta(updated_meta, meta_file_name);
+            .set_meta(meta.to_string(), meta_file_name);
     }
 
     //== release lock
@@ -102,7 +101,7 @@ pub fn distributed_add(
 /// Mutex prevents aliasing; we can only mutate data from one place at a time.
 pub fn distributed_get(
     key: String,
-    total_backends: usize,
+    total_backends: u32,
     arc_backends: Arc<Mutex<HashMap<String, Box<BkSend>>>>,
 ) -> Result<ResGetKeyValue, RepeatedField<String>> {
     //== attempt to acquire Mutex and block until
@@ -121,7 +120,7 @@ pub fn distributed_get(
     }
 
     //== if we dont have enough locks then release all locks and abort
-    if bk_id_locks.len() <= total_backends / 2 {
+    if bk_id_locks.len() as u32 <= total_backends / 2 {
         for bk_id in &bk_id_locks {
             bk_map.get(bk_id).unwrap().release_lock(key.clone());
         }
@@ -136,13 +135,13 @@ pub fn distributed_get(
     let mut bk_id_latest: String = "".to_string();
     {
         let mut bkid_meta_map: HashMap<String, String> = HashMap::new();
-        let mut bkid_ver_map: HashMap<String, usize> = HashMap::new();
+        let mut bkid_ver_map: HashMap<String, u32> = HashMap::new();
         //== we have enough locks so lets try to add value
         //FIXME make this concurrent
         for bk_id in &bk_id_locks {
             // get meta.version
             let meta = bk_map.get(bk_id).unwrap().get_meta(key.to_string());
-            let version = 10; //FIXME fake for now
+            let version = meta.latest_version;
             bkid_meta_map.insert(bk_map.get(bk_id).unwrap().id(), meta.to_string());
             bkid_ver_map.insert(bk_map.get(bk_id).unwrap().id(), version);
         }
