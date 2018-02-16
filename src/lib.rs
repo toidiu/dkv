@@ -1,5 +1,8 @@
 #![allow(unused)]
 
+#[macro_use]
+extern crate lazy_static;
+
 extern crate grpcio_proto;
 extern crate protobuf;
 extern crate slog;

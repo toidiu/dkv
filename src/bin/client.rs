@@ -31,6 +31,7 @@ fn main() {
     );
 
     let mut req = GetKeyRequest::new();
+    req.set_key("key1".to_string());
     let reply = client.get_key(&req).expect("rpc");
     info!(
         "Status of get was: {}:{:?}",

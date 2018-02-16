@@ -14,13 +14,13 @@ pub trait Backend {
 
     //== 'key.version' file that stores data for that particular version
     // this is always the next version
-    fn add_key(&self, data: &AddKeyRequest, obj_name: String) -> bool;
+    fn add_key(&self, data: &AddKeyRequest, key: String) -> bool;
     // this is always the lates version for now
-    fn get_key(&self, obj_name: String) -> String;
+    fn get_key(&self, key: String) -> String;
 
     //== 'key.meta' file that stores all information about kv
-    fn get_meta(&self) -> String;
-    fn set_meta(&self, meta: String, obj_name: String) -> bool;
+    fn get_meta(&self, key: String) -> String;
+    fn set_meta(&self, meta: String, key: String) -> bool;
 
     //== 'key.lock' that indicates atomic access
     // this needs to be an atomic operation

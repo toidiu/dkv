@@ -43,6 +43,7 @@ dependencies = [
  "grpcio 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "grpcio-proto 0.1.0",
  "grpcio-sys 0.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "lazy_static 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "libc 0.2.36 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.3.9 (registry+https://github.com/rust-lang/crates.io-index)",
  "num_cpus 1.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
