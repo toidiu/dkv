@@ -19,11 +19,11 @@ impl LocalFile {
     }
 
     fn write_lock(key: &str, should_be_locked: bool) {
-        LocalFile::write_file(&key, should_be_locked.to_string());
+        LocalFile::write_file(&format!("{}.lock",&key), should_be_locked.to_string());
     }
 
     fn read_lock(key: &str) -> bool {
-        if let Ok(read) = LocalFile::read_file(&key) {
+        if let Ok(read) = LocalFile::read_file(&format!("{}.lock",&key)) {
             FromStr::from_str(&read).unwrap()
         } else {
             // if file doesn't exist then create it and return lock is available
