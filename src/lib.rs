@@ -1,10 +1,13 @@
 #![allow(unused)]
 
+extern crate grpcio_proto;
 #[macro_use]
 extern crate lazy_static;
-
-extern crate grpcio_proto;
 extern crate protobuf;
+extern crate serde;
+#[macro_use]
+extern crate serde_derive;
+extern crate serde_json;
 extern crate slog;
 extern crate slog_async;
 extern crate slog_scope;

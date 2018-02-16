@@ -95,13 +95,12 @@ fn main() {
     let env = Arc::new(Environment::new(num_cpus::get()));
 
     let total_backends = 1;
-    let bk_in_mem = backend::in_mem::InMem::new("in-mem".to_string());
+    let bk_local_file = backend::local_file::LocalFile::new("local-file".to_string());
 
     let mut map: HashMap<String, Box<backend::BkSend>> = HashMap::new();
-    map.insert(bk_in_mem.get_id(), Box::new(bk_in_mem));
+    map.insert(bk_local_file.get_id(), Box::new(bk_local_file));
 
     let my_service = MyDkvService {
-        // backends: Arc::new(vec![bk_in_mem]),
         backends: Arc::new(Mutex::new(map)),
         total_backends: total_backends,
     };

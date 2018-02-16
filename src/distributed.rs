@@ -52,7 +52,7 @@ pub fn distributed_add(
                 .unwrap()
                 .get_meta(data.get_key().to_string());
             let version = 10; //FIXME fake for now
-            bkid_meta_map.insert(bk_map.get(bk_id).unwrap().id(), meta);
+            bkid_meta_map.insert(bk_map.get(bk_id).unwrap().id(), meta.to_string());
             bkid_ver_map.insert(bk_map.get(bk_id).unwrap().id(), version);
         }
 
@@ -143,7 +143,7 @@ pub fn distributed_get(
             // get meta.version
             let meta = bk_map.get(bk_id).unwrap().get_meta(key.to_string());
             let version = 10; //FIXME fake for now
-            bkid_meta_map.insert(bk_map.get(bk_id).unwrap().id(), meta);
+            bkid_meta_map.insert(bk_map.get(bk_id).unwrap().id(), meta.to_string());
             bkid_ver_map.insert(bk_map.get(bk_id).unwrap().id(), version);
         }
 
