@@ -2,6 +2,10 @@ use grpcio_proto::dkv::dkv::{AddKeyRequest, ResGetKeyValue};
 
 pub type BkSend = Backend + Send + Sync;
 
+// pub trait BkId{}
+
+// impl BkId for String{}
+
 pub mod in_mem;
 
 pub trait Backend {
