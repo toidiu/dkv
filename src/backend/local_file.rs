@@ -12,10 +12,7 @@ pub struct LocalFile {
 
 impl LocalFile {
     pub fn new(id: String, path: String) -> Self {
-        LocalFile { 
-            id: id,
-       path: path,
-        }
+        LocalFile { id: id, path: path }
     }
 
     pub fn get_id(&self) -> String {
@@ -27,8 +24,7 @@ impl LocalFile {
     }
 
     fn write_file(&self, key: &str, data: String) -> Result<(), ()> {
-        let p = &format!("{}/{}",self.path, &key);
-        println!("{}",p);
+        let p = &format!("{}/{}", self.path, &key);
         if let Ok(mut file) = File::create(p) {
             file.write_all(data.as_bytes());
             Ok(())
@@ -90,19 +86,14 @@ impl Backend for LocalFile {
 
     //== 'key.meta' file that stores all information about kv
     fn get_meta(&self, key: String) -> BkMeta {
-        println!("==========--- {}", &key);
         let meta_file_name = LocalFile::get_meta_file_name(&key);
         if let Ok(read) = self.read_file(&meta_file_name) {
-            println!("==========0");
-            println!("==========0{}", read);
             //FIXME from_str caused errors!!!!! investigate later
             use serde_json;
             let d = serde_json::from_str(&read).unwrap();
             // let d =BkMeta::from_str(&read).expect("file malformed");
-            println!("{:?}", d);
             d
         } else {
-            println!("==========1");
             BkMeta::init()
         }
     }

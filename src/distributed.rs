@@ -51,10 +51,8 @@ pub fn distributed_add(
                 .get(bk_id)
                 .unwrap()
                 .get_meta(data.get_key().to_string());
-            println!("{:?}", meta);
             let version = meta.latest_version;
 
-            println!("======ver {}", version);
             if max_version < version {
                 max_version = version
             }
@@ -72,7 +70,6 @@ pub fn distributed_add(
         //}
     }
 
-    println!("======max {}", max_version);
     let max_version = max_version + 1;
     //== Add the data with the latest version++ to
     // all the backends
@@ -83,9 +80,7 @@ pub fn distributed_add(
 
         // get meta and append new version info
         let meta = bkid_meta_map.get_mut(bk_id).expect("should exist");
-        println!("======max {}", max_version);
         meta.add_version(max_version);
-        println!("======meta {:?}", meta);
 
         // save meta
         bk_map

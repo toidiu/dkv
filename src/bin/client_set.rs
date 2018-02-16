@@ -30,5 +30,4 @@ fn main() {
         reply.get_status().get_success(),
         reply.get_status().get_msg()
     );
-
 }

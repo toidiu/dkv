@@ -95,14 +95,10 @@ fn main() {
     let env = Arc::new(Environment::new(num_cpus::get()));
 
     let total_backends = 1;
-    let bk_local_file1 = backend::local_file::LocalFile::new(
-        "local-file".to_string(),
-        "store1".to_string(),
-        );
-    let bk_local_file2 = backend::local_file::LocalFile::new(
-        "local-file2".to_string(),
-        "store2".to_string(),
-        );
+    let bk_local_file1 =
+        backend::local_file::LocalFile::new("local-file".to_string(), "store1".to_string());
+    let bk_local_file2 =
+        backend::local_file::LocalFile::new("local-file2".to_string(), "store2".to_string());
 
     let mut map: HashMap<String, Box<backend::BkSend>> = HashMap::new();
     map.insert(bk_local_file1.get_id(), Box::new(bk_local_file1));
