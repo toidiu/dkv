@@ -5,7 +5,7 @@ use std::collections::HashMap;
 lazy_static! {
     static ref META: Mutex<HashMap<String, String>> = Mutex::new(HashMap::new());
     static ref MEMORY: Mutex<HashMap<String, String>> = Mutex::new(HashMap::new());
-    static ref LOCK: Mutex<bool> = Mutex::new(false);
+    static ref LOCK: Mutex<HashMap<String, bool>> = Mutex::new(HashMap::new());
 }
 
 pub struct InMem {
@@ -63,16 +63,16 @@ impl ::backend::Backend for InMem {
 
     //== 'key.lock' that indicates atomic access
     // this needs to be an atomic operation
-    fn acquire_lock(&self) -> bool {
-        if *LOCK.lock().unwrap() {
+    fn acquire_lock(&self, key: String) -> bool {
+        if *LOCK.lock().unwrap().get(&key).unwrap_or(&false) {
             false
         } else {
-            *LOCK.lock().unwrap() = true;
+            LOCK.lock().unwrap().insert(key, true);
             true
         }
     }
-    fn release_lock(&self) -> bool {
-        *LOCK.lock().unwrap() = false;
+    fn release_lock(&self, key: String) -> bool {
+        LOCK.lock().unwrap().insert(key, false);
         true
     }
 }

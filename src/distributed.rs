@@ -18,7 +18,7 @@ pub fn distributed_add(
     let mut bk_id_locks: Vec<String> = Vec::new();
     for (bk_id, bk) in bk_map {
         // acquire lock
-        if bk.acquire_lock() {
+        if bk.acquire_lock(data.get_key().to_string()) {
             bk_id_locks.push(bk_id.clone());
         };
     }
@@ -26,7 +26,10 @@ pub fn distributed_add(
     //== if we dont have enough locks then release all locks and abort
     if bk_id_locks.len() <= total_backends / 2 {
         for bk_id in &bk_id_locks {
-            bk_map.get(bk_id).unwrap().release_lock();
+            bk_map
+                .get(bk_id)
+                .unwrap()
+                .release_lock(data.get_key().to_string());
         }
 
         return Err(RepeatedField::from_vec(vec![
@@ -84,7 +87,7 @@ pub fn distributed_add(
 
     //== release lock
     for bk_id in &bk_id_locks {
-        bk_map.get(bk_id).unwrap().release_lock();
+        bk_map.get(bk_id).unwrap().release_lock(bk_id.to_string());
     }
 
     Ok(bk_id_locks)
@@ -112,7 +115,7 @@ pub fn distributed_get(
     let mut bk_id_locks: Vec<String> = Vec::new();
     for (bk_id, bk) in bk_map {
         // acquire lock
-        if bk.acquire_lock() {
+        if bk.acquire_lock(key.clone()) {
             bk_id_locks.push(bk_id.clone());
         };
     }
@@ -120,7 +123,7 @@ pub fn distributed_get(
     //== if we dont have enough locks then release all locks and abort
     if bk_id_locks.len() <= total_backends / 2 {
         for bk_id in &bk_id_locks {
-            bk_map.get(bk_id).unwrap().release_lock();
+            bk_map.get(bk_id).unwrap().release_lock(key.clone());
         }
 
         return Err(RepeatedField::from_vec(vec![
@@ -155,19 +158,19 @@ pub fn distributed_get(
 
     //== get value from Backend bk_id_latest
     let bk_latest = bk_map.get(&bk_id_latest).expect("should exist").to_owned();
-    let file_name = format!("{}.{}", key, max_version);
+    let file_name = format!("{}.{}", key.clone(), max_version);
     let data = bk_latest.get_key(file_name);
 
     let mut val = ResGetKeyValue::new();
     val.set_data(data);
     val.set_version(max_version.to_string());
-    val.set_key(key);
+    val.set_key(key.clone());
 
     //FIXME optional (update backends with latest)
 
     //== release lock
     for bk_id in &bk_id_locks {
-        bk_map.get(bk_id).unwrap().release_lock();
+        bk_map.get(bk_id).unwrap().release_lock(key.clone());
     }
 
     Ok(val)

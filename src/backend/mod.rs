@@ -7,6 +7,7 @@ pub type BkSend = Backend + Send + Sync;
 // impl BkId for String{}
 
 pub mod in_mem;
+pub mod local_file;
 
 pub trait Backend {
     //== must be unique
@@ -24,6 +25,6 @@ pub trait Backend {
 
     //== 'key.lock' that indicates atomic access
     // this needs to be an atomic operation
-    fn acquire_lock(&self) -> bool;
-    fn release_lock(&self) -> bool;
+    fn acquire_lock(&self, key: String) -> bool;
+    fn release_lock(&self, key: String) -> bool;
 }
