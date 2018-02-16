@@ -210,8 +210,6 @@ pub fn distributed_get(
 
     // check if it exists
     //FIXME assume it does
-    //
-    // get locks
 
     //== attempt to acquire locks
     let mut bk_locks: HashMap<String, Box<BkSend>> = HashMap::new();
@@ -270,7 +268,6 @@ pub fn distributed_get(
     val.set_data(data);
     val.set_version(max_version.to_string());
     val.set_key(key);
-
 
     ////FIXME optional (update backends with latest)
 
