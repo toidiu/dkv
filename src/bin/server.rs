@@ -43,6 +43,7 @@ struct MyDkvService {
 
 impl Dkv for MyDkvService {
     fn add_key(&self, ctx: RpcContext, req: AddKeyRequest, sink: UnarySink<AddKeyReply>) {
+        info!("set key");
         let msg = format!("success!");
         let mut resp = AddKeyReply::new();
         let mut status = Status::new();
@@ -62,6 +63,7 @@ impl Dkv for MyDkvService {
     }
 
     fn get_key(&self, ctx: RpcContext, req: GetKeyRequest, sink: UnarySink<GetKeyReply>) {
+        info!("get key");
         let msg = format!("success!");
         let mut resp = GetKeyReply::new();
 
