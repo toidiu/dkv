@@ -1,12 +1,12 @@
 #![allow(unused)]
 
-extern crate slog;
-extern crate slog_async;
-extern crate slog_stdlog;
-extern crate slog_scope;
-extern crate slog_term;
 extern crate grpcio_proto;
 extern crate protobuf;
+extern crate slog;
+extern crate slog_async;
+extern crate slog_scope;
+extern crate slog_stdlog;
+extern crate slog_term;
 
 use std::fs::File;
 use std::sync::Arc;
@@ -18,10 +18,7 @@ use self::slog::{Drain, Logger, OwnedKV};
 use self::slog_scope::GlobalLoggerGuard;
 use self::slog_term::{Decorator, FullFormat, PlainSyncDecorator, TermDecorator};
 
-use grpcio_proto::dkv::dkv::{
-    ResGetKeyValue,
-    AddKeyRequest,
-};
+use grpcio_proto::dkv::dkv::{AddKeyRequest, ResGetKeyValue};
 
 pub fn init_log(log_file: Option<String>) -> GlobalLoggerGuard {
     fn setup<D: Decorator + Send + 'static>(decorator: D) -> GlobalLoggerGuard {
@@ -45,7 +42,6 @@ pub fn init_log(log_file: Option<String>) -> GlobalLoggerGuard {
 pub type BkSend = Backend + Send + Sync;
 
 pub trait Backend {
-
     //== must be unique
     fn id(&self) -> String;
 
@@ -71,21 +67,19 @@ pub trait Backend {
 // impl Backend for S3 {
 // }
 
-
 pub fn distributed_add(
     data: AddKeyRequest,
     total_backends: usize,
-    arc_backends: Arc<Vec<Box<BkSend>>>
+    arc_backends: Arc<Vec<Box<BkSend>>>,
 ) -> Result<Vec<Box<BkSend>>, String> {
-
     //== attempt to acquire Arc
     let mut bk_list = Vec::new();
-    // See if we can acquire Arc else fail... this should go away once we 
+    // See if we can acquire Arc else fail... this should go away once we
     // replace Arc with custom wrapper
     match Arc::try_unwrap(arc_backends) {
         Ok(b_vec) => bk_list = b_vec,
 
-        Err(e) => return Err("unable to acquire Arc".to_string())
+        Err(e) => return Err("unable to acquire Arc".to_string()),
     }
 
     //== attempt to acquire locks
@@ -98,13 +92,12 @@ pub fn distributed_add(
     }
 
     //== if we dont have enough locks then release all locks and abort
-    if bk_locks.len() <= total_backends/2 {
+    if bk_locks.len() <= total_backends / 2 {
         for bk in bk_locks {
             bk.release_lock();
         }
-        return Err("unable to acquire enough locks".to_string())
+        return Err("unable to acquire enough locks".to_string());
     }
-
 
     //== figure out which backend had the latest data.
     let mut max_version = 0;
@@ -134,7 +127,6 @@ pub fn distributed_add(
     //== Add the data with the latest version++ to
     // all the backends
     for bk in &bk_locks {
-
         // save data
         let file_name = format!("{}.{}", data.get_key(), max_version);
         bk.add_key(&data, file_name);
@@ -160,13 +152,11 @@ pub fn distributed_add(
 
 pub fn distributed_get(
     total_backends: usize,
-    arc_backends: Arc<Vec<Box<BkSend>>>
-    ) -> Result<ResGetKeyValue, RepeatedField<String>> {
+    arc_backends: Arc<Vec<Box<BkSend>>>,
+) -> Result<ResGetKeyValue, RepeatedField<String>> {
     let mut val = ResGetKeyValue::new();
     val.set_data("this is fake data".to_string());
     val.set_version("this is fake version".to_string());
     val.set_key("this is fake key".to_string());
     Ok(val)
 }
-
-

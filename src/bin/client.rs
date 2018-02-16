@@ -1,10 +1,10 @@
 #![allow(unused)]
 
+extern crate dkv;
 extern crate grpcio;
 extern crate grpcio_proto;
 #[macro_use]
 extern crate log;
-extern crate dkv;
 
 use std::sync::Arc;
 
@@ -12,14 +12,7 @@ use dkv::init_log;
 use grpcio::{ChannelBuilder, EnvBuilder};
 
 use grpcio_proto::dkv::dkv_grpc::{self, DkvClient};
-use grpcio_proto::dkv::dkv::{
-  Status,
-  AddKeyRequest,
-  GetKeyRequest,
-  GetKeyReply,
-  AddKeyReply
-};
-
+use grpcio_proto::dkv::dkv::{AddKeyReply, AddKeyRequest, GetKeyReply, GetKeyRequest, Status};
 
 fn main() {
     let _guard = init_log(None);
@@ -35,6 +28,9 @@ fn main() {
 
     let mut req = GetKeyRequest::new();
     let reply = client.get_key(&req).expect("rpc");
-    info!("Status of get was: {} and value was: {:?}", reply.get_status().get_success(), reply.get_val());
-
+    info!(
+        "Status of get was: {} and value was: {:?}",
+        reply.get_status().get_success(),
+        reply.get_val()
+    );
 }

@@ -3,12 +3,13 @@
 #![allow(unreadable_literal)]
 #![feature(underscore_lifetimes)]
 
+extern crate dkv;
 extern crate futures;
 extern crate grpcio;
 extern crate grpcio_proto;
-#[macro_use] extern crate log;
+#[macro_use]
+extern crate log;
 extern crate num_cpus;
-extern crate dkv;
 
 use dkv::init_log;
 use std::io::Read;
@@ -20,15 +21,8 @@ use futures::sync::oneshot;
 use grpcio::{Environment, RpcContext, ServerBuilder, UnarySink};
 
 use grpcio_proto::dkv::dkv_grpc::{self, Dkv};
-use grpcio_proto::dkv::dkv::{
-    Status,
-    AddKeyRequest,
-    GetKeyRequest,
-    GetKeyReply,
-    ResGetKeyValue,
-    AddKeyReply
-};
-
+use grpcio_proto::dkv::dkv::{AddKeyReply, AddKeyRequest, GetKeyReply, GetKeyRequest,
+                             ResGetKeyValue, Status};
 
 #[derive(Clone)]
 struct MyDkvService {
@@ -42,21 +36,16 @@ struct MyDkvService {
     backends: Arc<Vec<Box<dkv::BkSend>>>,
 
     total_backends: usize,
-
 }
 
 impl Dkv for MyDkvService {
-
     fn add_key(&self, ctx: RpcContext, req: AddKeyRequest, sink: UnarySink<AddKeyReply>) {
         let msg = format!("success!");
         let mut resp = AddKeyReply::new();
         let mut status = Status::new();
 
-        let add_status = dkv::distributed_add(
-            req.clone(),
-            self.total_backends,
-            Arc::clone(&self.backends)
-        );
+        let add_status =
+            dkv::distributed_add(req.clone(), self.total_backends, Arc::clone(&self.backends));
         if let Ok(_) = add_status {
             status.set_success(true);
         } else {
@@ -79,12 +68,12 @@ impl Dkv for MyDkvService {
             Ok(val) => {
                 status.set_success(true);
                 resp.set_val(val);
-            },
+            }
 
             Err(e_msg) => {
                 status.set_success(false);
                 status.set_msg(e_msg);
-            },
+            }
         }
 
         resp.set_status(status);
@@ -92,7 +81,6 @@ impl Dkv for MyDkvService {
             .map_err(move |e| error!("failed to reply {:?}: {:?}", req, e));
         ctx.spawn(f)
     }
-
 }
 
 fn main() {
@@ -101,7 +89,7 @@ fn main() {
 
     let total_backends = 2;
     let my_service = MyDkvService {
-        backends : Arc::new(Vec::new()),
+        backends: Arc::new(Vec::new()),
         total_backends: total_backends,
     };
     // FIXME
