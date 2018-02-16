@@ -42,8 +42,12 @@ protobuf-codec = ["protobuf"]
 secure = ["grpcio-sys/secure"]
 
 [[bin]]
-name = "client"
-path = "src/bin/client.rs"
+name = "client_set"
+path = "src/bin/client_set.rs"
+
+[[bin]]
+name = "client_get"
+path = "src/bin/client_get.rs"
 
 [[bin]]
 name = "server"

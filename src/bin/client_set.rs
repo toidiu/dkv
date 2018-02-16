@@ -21,24 +21,14 @@ fn main() {
     let client = DkvClient::new(ch);
 
     // ======= SET DATA
-    // let mut req = AddKeyRequest::new();
-    // req.set_key("key".to_string());
-    // req.set_data("data".to_string());
-    // let reply = client.add_key(&req).expect("rpc");
-    // info!(
-    //     "Status of add was: {}: {:?}",
-    //     reply.get_status().get_success(),
-    //     reply.get_status().get_msg()
-    // );
-
-    // ======= GET DATA
-    let mut req = GetKeyRequest::new();
+    let mut req = AddKeyRequest::new();
     req.set_key("key".to_string());
-    let reply = client.get_key(&req).expect("rpc");
+    req.set_data("data".to_string());
+    let reply = client.add_key(&req).expect("rpc");
     info!(
-        "Status of get was: {}:{:?}",
+        "Status of add was: {}: {:?}",
         reply.get_status().get_success(),
         reply.get_status().get_msg()
     );
-    info!("Value was: {:?}", reply.get_val());
+
 }
