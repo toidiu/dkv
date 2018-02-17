@@ -12,6 +12,7 @@ The vision was to depoy dkv as a side-car; which would be possible due to Rust's
 The main service project `dkv` lives in *src* while the protobuf dependency module `grpcio-proto` lives in *proto*.
 
 An overview of the workflow is as follows:
+
 - run `proto/build.sh` to generate your proto desc files
 - `cargo build -p grpcio-proto` to build the proto module
 - edit project code in `src/bin` and `src/lib`
@@ -19,6 +20,12 @@ An overview of the workflow is as follows:
 - `cargo run --bin client_set` to add key to backends
 - `cargo run --bin client_get` to get key from backends
 
+## Running
 
-In this demo version the "Backends" are simply folders at the project/executable root. The name of the folders can be configured in `server.rs`
+In this demo version the "Backends" are simply folders at the project/executable root. The name of the folders can be configured in `server.rs` (**s3** and **dropbox**)
 **The folders must exist for the server to work properly.**
+
+- Create folders `make createLocalS3` and `make createLocalDropbox`
+- run server `make server`
+- run clients `make set` and `make get` (currently there is minimal error handling so please set values before getting them. We can only get the latest value at the moment.. hack day)
+- test deleting and re-creating one of the backends `make deleteLocalS3` and `make deleteLocalDropbox`
