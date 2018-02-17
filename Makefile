@@ -1,15 +1,15 @@
 
-createStore1:
-	mkdir store1;
+createLocalS3:
+	mkdir s3;
 
-createStore2:
-	mkdir store2;
+createLocalDropbox:
+	mkdir dropbox;
 
-deleteStore1:
-	rm -r store1;
+deleteLocalS3:
+	rm -r s3;
 
-deleteStore2:
-	rm -r store2;
+deleteLocalDropbox:
+	rm -r dropbox;
 
 set:
 	cargo run --bin client_set
@@ -20,4 +20,4 @@ get:
 server:
 	cargo run --bin server
 
-.PHONY: createStore2 createStore1 deleteStore2 deleteStore1 get set server
+.PHONY: createLocalS3 createLocalDropbox deleteLocalDropbox deleteLocalS3 get set server
