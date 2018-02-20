@@ -1,7 +1,7 @@
 # dkv
 A distributed key value store. Written in Rust. Utilizes gRPC framework.
 
-Note: this was written during a 24hr hack-day event and is NOT production ready.
+**Note: this was written during a 24hr hack-day event and is NOT production ready.**
 
 ## Motivation
 Abstract the problem of KV storage. Add redundency to storage. Add versioning to storage. Learn Rust better.
