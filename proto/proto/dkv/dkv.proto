@@ -5,7 +5,7 @@ option java_package = "io.grpc.iheart.dkv";
 option java_outer_classname = "DKVProto";
 option objc_class_prefix = "DKV";
 
-package dkv;
+package com.toidiu.dkv;
 
 // The greeting service definition.
 service Dkv {

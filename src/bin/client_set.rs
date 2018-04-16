@@ -23,7 +23,7 @@ fn main() {
     // ======= SET DATA
     let mut req = AddKeyRequest::new();
     req.set_key("key".to_string());
-    req.set_data("data".to_string());
+    req.set_data("key data".to_string());
     let reply = client.add_key(&req).expect("rpc");
     info!(
         "Status of add was: {}: {:?}",

@@ -1,3 +1,10 @@
-
+# rust
 /target
 **/*.rs.bk
+
+# js
+node_modules
+
+# dir
+s3
+dropbox
