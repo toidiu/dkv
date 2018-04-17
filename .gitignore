@@ -4,6 +4,7 @@
 
 # js
 node_modules
+.next
 
 # dir
 s3
