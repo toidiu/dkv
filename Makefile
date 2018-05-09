@@ -21,6 +21,6 @@ server:
 	cargo run --bin server
 
 jsproto:
-	protoc --proto_path=proto --js_out=binary:client/src  proto/proto/dkv/dkv.proto
+	protoc --proto_path=proto --js_out=import_style=es6,binary:client/src  proto/proto/dkv/dkv.proto
 
 .PHONY: createLocalS3 createLocalDropbox deleteLocalDropbox deleteLocalS3 get set server
