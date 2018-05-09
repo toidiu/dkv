@@ -4,7 +4,8 @@
 
 # js
 node_modules
-.next
+client/.cache
+client/dist
 
 # dir
 s3
