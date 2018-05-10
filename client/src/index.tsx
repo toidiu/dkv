@@ -1,8 +1,10 @@
 import * as React from 'react';
 import * as ReactDOM from 'react-dom';
-import { Hello } from './components/hello'
+import { App, Test } from './components/App.tsx'
 
 ReactDOM.render(
-  <Hello name="apoorv" />,
+  <Test name="apoorv" bla="blaaa">
+    middle
+  </Test>,
   document.getElementById('app') as HTMLElement
 );
