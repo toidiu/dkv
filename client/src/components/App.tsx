@@ -11,7 +11,6 @@ function App(props: AppProps) {
   return (
     <div>
       <Nav title={props.title} />
-      <br/>
       <div>my name is {props.name}</div>
     </div>
   );

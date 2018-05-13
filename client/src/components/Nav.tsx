@@ -1,14 +1,15 @@
 import * as React from 'react';
+import './Nav.less';
 
-export interface Props {
+export interface NavProps {
   title: string;
 }
 
-function Nav({title}: Props) {
+function Nav(props: NavProps) {
 
   return (
-    <nav id="nav">
-      <div>the title is {title}</div>
+    <nav className="nav">
+      <div>the title is {props.title}</div>
     </nav>
   );
 }
