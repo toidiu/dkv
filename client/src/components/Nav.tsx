@@ -1,7 +1,17 @@
 import * as React from 'react';
 
-export const Nav = ({name}) => (
-  <div>
-    <div>{`Hi ${name}`}</div>
-  </div>
-);
+export interface Props {
+  title: string;
+}
+
+function Nav({title}: Props) {
+
+  return (
+    <nav id="nav">
+      <div>the title is {title}</div>
+    </nav>
+  );
+}
+
+
+export default Nav;

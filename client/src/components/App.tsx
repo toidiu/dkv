@@ -1,22 +1,20 @@
 import * as React from 'react';
+import Nav from './Nav.tsx'
 
-export const App = ({name}) => (
-  <div>
-    <div>{`Hi ${name}`}</div>
-  </div>
-);
-
-/* export const Test = ({name}) => ( */
-/*   <div> */
-/*     <div>{`test ${name}`}</div> */
-/*   </div> */
-/* ); */
-
-export function Test({name, bla}) {
-  return(
-    <div>
-      <div>{`test ${name}`}</div>
-      {`${bla}`}
-    </div>
-  )
+export interface AppProps {
+  title: string;
+  name: string;
 }
+
+function App(props: AppProps) {
+
+  return (
+    <div>
+      <Nav title={props.title} />
+      <br/>
+      <div>my name is {props.name}</div>
+    </div>
+  );
+}
+
+export default App;
