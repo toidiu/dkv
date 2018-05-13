@@ -23,4 +23,7 @@ server:
 jsproto:
 	protoc --proto_path=proto --js_out=import_style=es6,binary:client/src  proto/proto/dkv/dkv.proto
 
-.PHONY: createLocalS3 createLocalDropbox deleteLocalDropbox deleteLocalS3 get set server
+ghpages:
+	git subtree push --prefix client/dist origin gh-pages
+
+.PHONY: createLocalS3 createLocalDropbox deleteLocalDropbox deleteLocalS3 get set server ghpages
