@@ -1,4 +1,9 @@
 nav {
   height: 50px;
+}
+nav a {
   color: brown;
+}
+nav .active {
+  color: red;
 }

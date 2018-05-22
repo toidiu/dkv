@@ -10,8 +10,11 @@ function App(props: AppProps) {
 
   return (
     <div>
-      <Nav title={props.title} />
-      <div>my name is {props.name}</div>
+      <Nav title={props.title} links={["github", "about:active"]} />
+
+
+
+      <h1>my name is {props.name}</h1>
     </div>
   );
 }
