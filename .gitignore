@@ -5,7 +5,6 @@
 # js
 node_modules
 client/.cache
-# client/dist
 
 # dir
 s3

@@ -1,5 +1,5 @@
 import * as React from 'react';
-import Nav from './Nav.tsx'
+import Nav from '../components/Nav.tsx'
 
 export interface AppProps {
   title: string;
@@ -15,6 +15,8 @@ function App(props: AppProps) {
 
 
       <h1>my name is {props.name}</h1>
+
+      this is the start of the project
     </div>
   );
 }
