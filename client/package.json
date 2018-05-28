@@ -14,7 +14,8 @@
   "dependencies": {
     "components": "^0.1.0",
     "react": "^16.3.2",
-    "react-dom": "^16.3.2"
+    "react-dom": "^16.3.2",
+    "styled-components": "^3.3.0"
   },
   "devDependencies": {
     "less": "^3.0.4",

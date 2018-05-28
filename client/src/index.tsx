@@ -3,7 +3,7 @@ import * as ReactDOM from 'react-dom';
 import App from './pages/App.tsx'
 
 ReactDOM.render(
-  <App title="dkv" name="apoorv" >
+  <App title="dkv" >
     middle
   </App>,
   document.getElementById('app') as HTMLElement
