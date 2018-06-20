@@ -1,10 +1,12 @@
 import * as React from 'react';
-import * as ReactDOM from 'react-dom';
+import { render } from 'react-dom';
+import { BrowserRouter, HashRouter } from 'react-router-dom'
 import App from './pages/App.tsx'
 
-ReactDOM.render(
-  <App title="dkv" >
-    middle
-  </App>,
-  document.getElementById('app') as HTMLElement
-);
+
+render((
+  <HashRouter>
+    <App />
+  </HashRouter>
+), document.getElementById('app'));
+
