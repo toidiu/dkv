@@ -1,6 +1,5 @@
 import * as React from 'react';
-import styled from 'styled-components';
-
+/* import proto from '../proto/dkv/dkv_pb.js'; */
 
 class Dkv extends React.Component {
   constructor(props) {
@@ -17,6 +16,7 @@ class Dkv extends React.Component {
 
   handleSubmit(event) {
     console.log('A name was submitted: ' + this.state.value);
+    /* proto.com.toidiu.dkv.GetKeyRequest.prototype.getKey(1); */
 
     event.preventDefault();
   }
@@ -37,22 +37,5 @@ class Dkv extends React.Component {
     );
   }
 }
-
-/* const Input = styled.input` */
-/*   padding: 0.5em; */
-/*   margin: 0.5em; */
-/*   color: palevioletred; */
-/*   background: papayawhip; */
-/*   border: none; */
-/*   border-radius: 3px; */
-/* `; */
-
-/* const Button = styled.button` */
-/*   background: palevioletred; */
-/*   border-radius: 3px; */
-/*   border: none; */
-/*   color: white; */
-/* `; */
-
 
 export default Dkv;
