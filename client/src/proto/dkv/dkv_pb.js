@@ -172,7 +172,7 @@ proto.com.toidiu.dkv.Status.prototype.getSuccess = function() {
 
 /** @param {boolean} value */
 proto.com.toidiu.dkv.Status.prototype.setSuccess = function(value) {
-  jspb.Message.setProto3BooleanField(this, 1, value);
+  jspb.Message.setField(this, 1, value);
 };
 
 
@@ -355,7 +355,7 @@ proto.com.toidiu.dkv.AddKeyRequest.prototype.getKey = function() {
 
 /** @param {string} value */
 proto.com.toidiu.dkv.AddKeyRequest.prototype.setKey = function(value) {
-  jspb.Message.setProto3StringField(this, 1, value);
+  jspb.Message.setField(this, 1, value);
 };
 
 
@@ -370,7 +370,7 @@ proto.com.toidiu.dkv.AddKeyRequest.prototype.getData = function() {
 
 /** @param {string} value */
 proto.com.toidiu.dkv.AddKeyRequest.prototype.setData = function(value) {
-  jspb.Message.setProto3StringField(this, 2, value);
+  jspb.Message.setField(this, 2, value);
 };
 
 
@@ -695,7 +695,7 @@ proto.com.toidiu.dkv.ResGetKeyValue.prototype.getKey = function() {
 
 /** @param {string} value */
 proto.com.toidiu.dkv.ResGetKeyValue.prototype.setKey = function(value) {
-  jspb.Message.setProto3StringField(this, 1, value);
+  jspb.Message.setField(this, 1, value);
 };
 
 
@@ -710,7 +710,7 @@ proto.com.toidiu.dkv.ResGetKeyValue.prototype.getData = function() {
 
 /** @param {string} value */
 proto.com.toidiu.dkv.ResGetKeyValue.prototype.setData = function(value) {
-  jspb.Message.setProto3StringField(this, 2, value);
+  jspb.Message.setField(this, 2, value);
 };
 
 
@@ -725,7 +725,7 @@ proto.com.toidiu.dkv.ResGetKeyValue.prototype.getVersion = function() {
 
 /** @param {string} value */
 proto.com.toidiu.dkv.ResGetKeyValue.prototype.setVersion = function(value) {
-  jspb.Message.setProto3StringField(this, 3, value);
+  jspb.Message.setField(this, 3, value);
 };
 
 
@@ -867,7 +867,7 @@ proto.com.toidiu.dkv.GetKeyRequest.prototype.getKey = function() {
 
 /** @param {string} value */
 proto.com.toidiu.dkv.GetKeyRequest.prototype.setKey = function(value) {
-  jspb.Message.setProto3StringField(this, 1, value);
+  jspb.Message.setField(this, 1, value);
 };
 
 
